@@ -11,31 +11,48 @@ const router: Router = Router();
 // is mounted on in the server.ts file.
 // In this case it's /welcome
 router.get('/', (req: Request, res: Response) => {
-    // Reply with a hello world when no name param is provided
-    let test = new Test(1, "name11", "comment11", new Date(), new Date(), null);
 
-    let str = "";
+  //Тест декораторов
+  /*
+  console.log('WelcomeController -> start');
 
-    for(let propertyName of Object.getOwnPropertyNames(test)){
-        str += propertyName
-            + " = "
-            + test[propertyName]
-            + ", "
-            + (test[propertyName] == null ? "" : test[propertyName].constructor.name)
-            + "; instanceof = "
-            + (test[propertyName] instanceof Date)
-            + ";  ";
-    }
+  let t: Test = new Test('Hello');
+  console.log('t.hello = ' + t.hello);
 
-    res.send('Hello, World!' + str);
+  console.log('foo(12) = ' + t.foo(12));
+
+  res.send('Hello, World!');
+
+  */
+
+  /*
+  let arr = [
+    {'num': 1},
+    {'num': 2},
+    {'num': 3},
+    {'num': 4},
+    {'num': 5},
+  ];
+  for (let item of arr) {
+    setTimeout(function() {
+      console.log(item);
+    }, 1000);
+  }
+  res.send('Таймеры установлены');
+  */
+
+
+
+  res.send('');
+
 });
 
 router.get('/:name', (req: Request, res: Response) => {
-    // Extract the name from the request parameters
-    let { name } = req.params;
+  // Extract the name from the request parameters
+  let {name} = req.params;
 
-    // Greet the given name
-    res.send(`Hello, ${name}`);
+  // Greet the given name
+  res.send(`Hello, ${name}`);
 });
 
 // Export the express.Router() instance to be used by server.ts

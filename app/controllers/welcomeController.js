@@ -3,28 +3,40 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 // Import only what we need from express
 var express_1 = require("express");
-var test_1 = require("./entity/test");
 // Assign router to the express.Router() instance
 var router = express_1.Router();
 // The / here corresponds to the route that the WelcomeController
 // is mounted on in the server.ts file.
 // In this case it's /welcome
 router.get('/', function (req, res) {
-    // Reply with a hello world when no name param is provided
-    var test = new test_1.Test(1, "name11", "comment11", new Date(), new Date(), null);
-    var str = "";
-    for (var _i = 0, _a = Object.getOwnPropertyNames(test_1.Test); _i < _a.length; _i++) {
-        var propertyName = _a[_i];
-        str += propertyName
-            + " = "
-            + test[propertyName]
-            + ", "
-            + (test[propertyName] == null ? "" : test[propertyName].constructor.name)
-            + "; instanceof = "
-            + (test[propertyName] instanceof Date)
-            + ";  ";
+    //Тест декораторов
+    /*
+    console.log('WelcomeController -> start');
+  
+    let t: Test = new Test('Hello');
+    console.log('t.hello = ' + t.hello);
+  
+    console.log('foo(12) = ' + t.foo(12));
+  
+    res.send('Hello, World!');
+  
+    */
+    /*
+    let arr = [
+      {'num': 1},
+      {'num': 2},
+      {'num': 3},
+      {'num': 4},
+      {'num': 5},
+    ];
+    for (let item of arr) {
+      setTimeout(function() {
+        console.log(item);
+      }, 1000);
     }
-    res.send('Hello, World!' + str);
+    res.send('Таймеры установлены');
+    */
+    res.send('');
 });
 router.get('/:name', function (req, res) {
     // Extract the name from the request parameters
