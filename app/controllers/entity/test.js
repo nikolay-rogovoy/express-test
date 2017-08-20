@@ -12,35 +12,34 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var d1_1 = require("./d1");
+const d1_1 = require("./d1");
 /**
  * Created by Николай on 28.06.2017.
  */
 //import {} from './d1';
 //  require(Test)
 // @PluginDecorator('param')
-var Test = (function () {
-    function Test(m) {
+let Test = class Test {
+    constructor(m) {
         this.property = "property";
         this.hello = m;
         console.log("Test constructor this.hello = " + this.hello);
     }
-    Test.prototype.foo = function (i) {
+    foo(i) {
         console.log("foo() i = " + i);
         return i * i;
         //return i * i;
-    };
-    __decorate([
-        d1_1.FunctionDecorator('for foo'),
-        __param(0, d1_1.LogParameter),
-        __metadata("design:type", Function),
-        __metadata("design:paramtypes", [Number]),
-        __metadata("design:returntype", Number)
-    ], Test.prototype, "foo", null);
-    Test = __decorate([
-        d1_1.ClassDecorator,
-        __metadata("design:paramtypes", [String])
-    ], Test);
-    return Test;
-}());
+    }
+};
+__decorate([
+    d1_1.FunctionDecorator('for foo'),
+    __param(0, d1_1.LogParameter),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Number)
+], Test.prototype, "foo", null);
+Test = __decorate([
+    d1_1.ClassDecorator,
+    __metadata("design:paramtypes", [String])
+], Test);
 exports.Test = Test;

@@ -100,13 +100,32 @@ var async = require("async");
   // Полезна как точка входа в водопад
 
   // Логирует возврат колбэка, тоже что и async.dir по сути
-  async.dir((par, callback) => { callback(null, {'par': par}) }, 'world');
+  // async.dir((par, callback) => { callback(null, {'par': par}) }, 'world');
+
+  //
+  // testNextTick();
+
+  // var async.timeout - установить таймаут на работу асинхронной функции
 
 
+
+  // reflect(fn) - Обернуть асинхронную функцию другой функцией, в колбэке объект с двумя свойтвами: error или value.
 
   console.log('end');
 
 })();
+
+function testNextTick() {
+  var call_order = [];
+  async.nextTick(function() {
+    call_order.push('two');
+  });
+  call_order.push('one');
+
+  async.setImmediate(function (a, b, c) {
+    // a, b, and c equal 1, 2, and 3
+  }, 1, 2, 3);
+}
 
 function testWhilst() {
   let count = 0;
@@ -465,9 +484,14 @@ function testForEach(limit) {
     }
     else {
       async.forEachLimit(arr, limit, f, function (err) {
-        // Все функции отработали
-        console.log('Все функции отработали err = ' + err);
         // Если одна из функций вернет err, то вызовется финальный колбэк без ожидания завершения остальных функций
+        if (err) {
+          console.log('Все функции отработали err = ' + err);
+        }
+        else {
+          // Все функции отработали
+          console.log('Все функции отработали');
+        }
       });
     }
   }

@@ -2,17 +2,17 @@
 /* app/server.ts */
 Object.defineProperty(exports, "__esModule", { value: true });
 // Import everything from express and assign it to the express variable
-var express = require("express");
+const express = require("express");
 // Import WelcomeController from controllers entry point
-var controllers_1 = require("./controllers");
+const controllers_1 = require("./controllers");
 // Create a new express application instance
-var app = express();
+const app = express();
 // The port the express app will listen on
-var port = process.env.PORT || 3333;
+const port = process.env.PORT || 3333;
 // Mount the WelcomeController at the /welcome route
 app.use('/welcome', controllers_1.WelcomeController);
 // Serve the application at the given port
-app.listen(port, function () {
+app.listen(port, () => {
     // Success callback
-    console.log("Listening at http://localhost:" + port + "/");
+    console.log(`Listening at http://localhost:${port}/`);
 });
