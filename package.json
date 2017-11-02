@@ -11,7 +11,9 @@
     "testRXJS2": "node tools/testRXJS.js",
     "testReport": "node tools/testReport.js",
     "testRegExp": "node tools/testRegExp.js",
-    "testMagicString": "node tools/testMagicString.js"
+    "testMagicString": "node tools/testMagicString.js",
+    "testAsyncAwait": "node tools/testAsyncAwait.js",
+    "testRegex": "node tools/testRegex.js"
   },
   "author": "n_g <nikolay.rogovoy@gmail.com>",
   "license": "ISC",
