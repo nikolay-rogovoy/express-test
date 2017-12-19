@@ -2,27 +2,113 @@
 import {GroupedObservable} from "rxjs/operator/groupBy";
 
 const EventEmitter = require('events');
-import * as Rx from 'rxjs/Rx';
-import {switchMap} from "rxjs/operator/switchMap";
+import {
+    reduce, map, switchMap, take, switchMapTo, scan, pluck, partition, pairwise, mergeScan,
+    mergeMapTo, mergeMap, mapTo, groupBy, flatMap, expand, repeat, repeatWhen, bufferCount, bufferWhen, concatMap
+} from "rxjs/operators";
+import {Observable} from "rxjs/Observable";
+import {of} from "rxjs/observable/of";
+//import {of} from "rxjs/observable/pa";
+import {zip} from "rxjs/observable/zip";
+import {from} from "rxjs/observable/from";
+import {Observer} from "rxjs/Observer";
+import {interval} from "rxjs/observable/interval";
+import {pipe, Scheduler} from "rxjs/Rx";
+import {forkJoin} from "rxjs/observable/forkJoin";
+import {bindCallback} from "rxjs/observable/bindCallback";
+import {defer} from "rxjs/observable/defer";
+import {empty} from "rxjs/observable/empty";
+import {fromEventPattern} from "rxjs/observable/fromEventPattern";
+import {fromPromise} from "rxjs/observable/fromPromise";
+import {merge} from "rxjs/observable/merge";
+import {never} from "rxjs/observable/never";
+import {timer} from "rxjs/observable/timer";
+import {BehaviorSubject} from "rxjs/BehaviorSubject";
+import {Subject} from "rxjs/Subject";
+import {fromEvent} from "rxjs/observable/fromEvent";
+import {SizedocPlanComponent} from "./src/sizedoc/load-resource/load-resource";
+//import * as Rx from 'rxjs/Rx';
 //const Rx = require('rxjs/Rx.js');
 
 
 (function main() {
     console.log('start');
 
-    switchMapToTest();
+    // switchMapTest();
+
+    let sizedocPlanComponent = new SizedocPlanComponent();
+    sizedocPlanComponent.test();
 
     console.log('end');
 
 })();
 
 /**
+ * Последний эмит отменяет все предыдущие эмиты
+ * Запомнить как Переключиться на новый обозревабль
+ * Т.е. при поступление нового эмита предыдущий теряется
+ * если каждый запрос должен быть завершен, то нужно использовать mergeMap
+ * */
+function switchMapTest () {
+    let o = of([1, 2, 3]);
+    o.pipe(
+        switchMap(x => {
+            return from(x);
+        }),
+        // switchMap
+        switchMap(x => {
+            console.log(`x = ${x}`);
+            return Observable.create((observer) => {
+                setTimeout(() => {
+                    observer.next(x);
+                    observer.complete();
+                }, 1000);
+            })
+        })
+        /*,
+        reduce((acc, cur: number) => {
+            acc.push(cur);
+            return acc;
+        }, [])
+        */
+    )
+        .subscribe(x => console.log(x),
+            (error) => console.log('error'),
+            () => console.log('complete')
+        );
+}
+
+function reduceTest() {
+    let o = of(27, 25);
+    o.pipe(
+        reduce((acc, x: number) => {acc.push(x); return acc;}, [])
+    )
+        .subscribe(x => console.log(JSON.stringify(x)));
+}
+
+/***/
+function zipTest() {
+
+    let age$ = of<number>(27, 25, 29);
+    let name$ = of<string>('Foo', 'Bar', 'Beer');
+    let isDev$ = of<boolean>(true, true, false);
+        zip(age$,
+            name$,
+            isDev$,
+            (age: number, name: string, isDev: boolean) => ({ age, name, isDev }))
+        .subscribe(x => console.log(x));
+}
+
+/**
  *switchMapTo - тоже что и switchMapTo, только не принимает входящий параметр, а сразу возвращает обозревабль
  * */
 function switchMapToTest() {
-    Rx.Observable.interval(500).take(4)
-        .switchMapTo(Rx.Observable.of(1))
-        .subscribe(x => console.log(x));
+    interval(500)
+        .pipe(take(4),
+            switchMapTo(of(1))
+        ).subscribe((x: number) => {
+            console.log(x)
+        });
 }
 
 /**
@@ -30,11 +116,11 @@ function switchMapToTest() {
  * тоже что и mergeScan, только возвращает сразу аккумулятор, а mergeScan возвращает обозреватель типа аккумулятора
  * */
 function scanTest() {
-    let source = Rx.Observable.interval(500).take(4);
+    let source = interval(500).take(4);
     // Начальное значение аккумулятора
     let seed = 0;
     // Функция, берет аккумулятор, и испускаемые значения первым обозерваблем, возращает аккумулятор
-    let count = source.scan((acc, current) => acc + current, seed);
+    let count = source.pipe(scan((acc, current) => acc + current, seed));
     count.subscribe(x => console.log(x));
 }
 /**
@@ -42,20 +128,20 @@ function scanTest() {
  * Что то типа map
  * */
 function pluckTest() {
-    Rx.Observable.of({a: 1},{a: 2})
-        .pluck('a')
-        .subscribe(x => console.log(x));
+    of({a: 1}, {a: 2}).pipe(
+        pluck('a')
+    ).subscribe(x => console.log(x));
 }
 
 /**
  *Делит один обозревабль на да по результату функции (фунция должна возвращать булл)
  * */
 function partitionTest() {
-    let pair = Rx.Observable.interval(500).take(4)
-        .partition(x => x % 2 == 0);
-
+    /*
+    let pair = interval(500).pipe(take(4), partition<number>((x, index: number) => x % 2 == 0));
     pair[0].subscribe(x => console.log(`x = ${x}`));
     pair[1].subscribe(y => console.log(`y = ${y}`));
+    */
 }
 
 /**
@@ -66,8 +152,8 @@ function partitionTest() {
  * [ 2, 3 ]
  * */
 function pairwiseTest() {
-    let source = Rx.Observable.interval(500).take(4);
-    source.pairwise()
+    let source = interval(500).pipe(take(4));
+    source.pipe(pairwise())
         .subscribe(x => console.log(x));
 }
 
@@ -75,11 +161,11 @@ function pairwiseTest() {
  * Может аккумулировать значения родительского обозревабля (испускаемые значения - значения аккумулятора)
  * */
 function mergeScanTest() {
-    let source = Rx.Observable.interval(1000).take(4);
+    let source = interval(1000).pipe(take(4));
     // Начальное значение аккумулятора
     let seed = 0;
     // Функция, берет аккумулятор, и испускаемые значения первым обозерваблем, возращает обозревабль типа аккамулятора
-    let count = source.mergeScan((acc, one) => Rx.Observable.of(acc + one), seed);
+    let count = source.pipe(mergeScan((acc, one) => of(acc + one), seed));
     count.subscribe(x => console.log(x));
 }
 
@@ -89,9 +175,9 @@ function mergeScanTest() {
  * тоже что и mergeMap, только игнорит получаемое значение от родитеьского обзервабля
  * */
 function mergeMapToTest() {
-    Rx.Observable.interval(1000)
-        .take(4)
-        .mergeMapTo(Rx.Observable.of(1, 2))
+    interval(1000).pipe(take(4),
+        mergeMapTo(of(1, 2))
+    )
         .subscribe((
             (result) => {
                 console.log(result);
@@ -104,9 +190,9 @@ function mergeMapToTest() {
  * Результирующая подписка получает произведение испускаемых значений внешнего и внутреннего обозервабля
  * */
 function mergeMapTest() {
-    Rx.Observable.interval(1000)
-        .take(4)
-        .mergeMap((i) => Rx.Observable.of(1 * i, 2 * i))
+    interval(1000).pipe(take(4),
+        mergeMap((i) => of(1 * i, 2 * i))
+    )
         .subscribe((
             (result) => {
                 console.log(result);
@@ -116,51 +202,52 @@ function mergeMapTest() {
 
 /**Конвертит каждое испускаемое значение в константу*/
 function mapToTest() {
-    Rx.Observable.of(1, 2, 4)
-        .map (x => x)
-        .mapTo('qwe')
+    of(1, 2, 4).pipe(map (x => x),
+        mapTo('qwe')
+    )
         .subscribe((
             (result) => {
                 console.log(result);
             }
         ));
-
 }
 
 /**Делает пачку обсерваблей, один обсервабль на группу (Объект GroupedObservable наследник обсервабля
  * только имеет свойство key)*/
 function groupByTest() {
+    /*
+    // TODO Посмотреть
     const people = [{name: 'Sue', age: 25}, {name: 'Joe', age: 30}, {name: 'Frank', age: 25}, {name: 'Sarah', age: 35}];
     //emit each person
-    const source = Rx.Observable.from(people);
+    const source = from(people);
     //group by age
-    const example = source
-        .groupBy(person => person.age)
+    const example = source.pipe(groupBy(person => person.age),
     //return as array of each group
-    .flatMap(group => group.reduce((acc, curr) => {
-        /*[...acc, curr]*/
+    flatMap(group => group.reduce((acc, curr) => {
+        //[...acc, curr]
         acc.push(curr);
         return acc;
     }, []));
-    /*
-     output:
-     [{age: 25, name: "Sue"},{age: 25, name: "Frank"}]
-     [{age: 30, name: "Joe"}]
-     [{age: 35, name: "Sarah"}]
-     */
+    //
+    // output:
+    // [{age: 25, name: "Sue"},{age: 25, name: "Frank"}]
+    // [{age: 30, name: "Joe"}]
+    // [{age: 35, name: "Sarah"}]
+    //
     const subscribe = example.subscribe(val => {
             console.log(val);
         }
     );
+    */
 }
 
 /**Функция получает аргумент, возвращает обозревабль, испущенное значение которого принимается
  * как входящий аргумент при последующей итерации - рекурсивная*/
 function expandTest() {
-    let observable = Rx.Observable.of(2);
-    let observable2 = observable
-        .expand(x => Rx.Observable.of(2 * x).delay(250))
-        .take(10);
+    let observable = of(2);
+    let observable2 = observable.pipe(expand(x => of(2 * x).delay(250)),
+        take(10)
+    );
     observable2.subscribe(x => console.log(x));
 }
 
@@ -169,10 +256,10 @@ function expandTest() {
  * селектор не обязателен, если нет, то массив результатов
  * */
 function forkJoinTest() {
-    const observable1 = Rx.Observable.of(1, 11).delay(1000);
-    const observable2 = Rx.Observable.of(2, 22).delay(500);
+    const observable1 = of(1, 11).delay(1000);
+    const observable2 = of(2, 22).delay(500);
 
-    const observable3 = Rx.Observable.forkJoin(observable1, observable2,
+    const observable3 = forkJoin(observable1, observable2,
         (r1, r2) => {
             return {'r1': r1, 'r2': r2}
         }
@@ -187,7 +274,7 @@ function bindCallbackTest() {
         callback(`param1 = ${param1}`, `param2 = ${param2}`);
     }
     // Получаем функцию, передаем функцию, функцию обработки возврата результата, тип шедулера
-    let f2 = Rx.Observable.bindCallback(f, (x, y) => x + '; ' + y, Rx.Scheduler.async);
+    let f2 = bindCallback(f, (x, y) => x + '; ' + y, Scheduler.async);
     // Вызываем функцию, получаем обсервэйбл
     let result = f2('test1', 'test2');
     // Запускаем функцию
@@ -210,13 +297,13 @@ function bindNodeCallbackTest() {
         callback(new Error('www'), `param1 = ${param1}; param2 = ${param2}`);
     }
     // Получаем функцию, передаем функцию, функцию обработки возврата результата, тип шедулера
-    let f2 = Rx.Observable.bindCallback(f, (x, y) => {
+    let f2 = bindCallback(f, (x, y) => {
         if (x != null) {
             throw x;
         } else {
             return y;
         }
-    }, Rx.Scheduler.async);
+    }, Scheduler.async);
     // Вызываем функцию, получаем обсервэйбл
     let result = f2('test1', 'test2');
     // Запускаем функцию
@@ -231,29 +318,28 @@ function bindNodeCallbackTest() {
 
 /**create Функция геератор вызывается для каждого подписчика*/
 function crateTest() {
-    let observable = Rx.Observable.create((observer: Rx.Observer<number>) => {
+    let observable = Observable.create((observer: Observer<number>) => {
         observer.next(1);
         observer.next(2);
         observer.next(3);
         observer.complete();
-    }, Rx.Scheduler.async);
+    }, Scheduler.async);
     subscribeTest(observable);
 }
 
 /**defer - В момент подписки использует фабрику для создания Observable (отложенное создание)*/
 function deferTest() {
 
-    let observable = Rx.Observable.defer(
+    let observable = defer(
         () => {
-            return Rx.Observable.of(11, 22, 33, Rx.Scheduler.async);
+            return of(11, 22, 33, Scheduler.async);
         });
-
     subscribeTest(observable);
 }
 
 /**Делает Observable который сразу испускает complete - нужен для композиции с другими обозревателями*/
 function emptyTest() {
-    let observable = Rx.Observable.empty(Rx.Scheduler.async);
+    let observable = empty(Scheduler.async);
     subscribeTest(observable);
 }
 
@@ -264,7 +350,7 @@ function emptyTest() {
  *
  * */
 function fromTest() {
-    let observable = Rx.Observable.from('wwqq', Rx.Scheduler.async);
+    let observable = from('wwqq', Scheduler.async);
     subscribeTest(observable);
 }
 
@@ -287,7 +373,7 @@ function fromEventPatternTest() {
         ee.removeListener('event', handler);
     }
 
-    var observable = Rx.Observable.fromEventPattern(
+    var observable = fromEventPattern(
         addClickHandler,
         removeClickHandler
     );
@@ -306,13 +392,13 @@ function fromPromiseTest() {
         // Испустить ошибку
         reject('www');
     });
-    var observable = Rx.Observable.fromPromise(promise);
+    var observable = fromPromise(promise);
     subscribeTest(observable);
 }
 
 /** interval - испускает бесконечную последовательность чисел*/
 function intervalTest() {
-    var observable = Rx.Observable.interval(1000, Rx.Scheduler.async);
+    var observable = Observable.interval(1000, Scheduler.async);
     subscribeTest(observable);
 
     setTimeout(() => {
@@ -323,7 +409,7 @@ function intervalTest() {
 /**merge - Объединяет любое количество обсерваблей с один
  * concurrent - количество соединяемых обсерваблей, остальные будут делаться после комплита первой партии*/
 function mergeTest() {
-    const observable1 = Rx.Observable.create((observer) => {
+    const observable1 = Observable.create((observer) => {
         observer.next(1);
         setTimeout(() => {
             observer.next(2);
@@ -333,7 +419,7 @@ function mergeTest() {
         }, 1000);
     });
 
-    const observable2 = Rx.Observable.create((observer) => {
+    const observable2 = Observable.create((observer) => {
         observer.next(10);
         setTimeout(() => {
             observer.next(20);
@@ -343,7 +429,7 @@ function mergeTest() {
         }, 1500);
     });
 
-    const observable3 = Rx.Observable.create((observer) => {
+    const observable3 = Observable.create((observer) => {
         observer.next(100);
         setTimeout(() => {
             observer.next(200);
@@ -353,7 +439,7 @@ function mergeTest() {
         }, 1500);
     });
 
-    const observable = Rx.Observable.merge(observable1, observable2, observable3, 2);
+    const observable = merge(observable1, observable2, observable3, 2);
 
     subscribeTest(observable);
 
@@ -361,16 +447,14 @@ function mergeTest() {
 
 /**Создает обсервабль который не испускает ни каких значений, комплитов, и ошибок*/
 function neverTest() {
-    const observable = Rx.Observable.never().startWith(7);
+    const observable = never().startWith(7);
     subscribeTest(observable);
-
-    //setTimeout(() => {console.log('123')}, 3000);
 }
 /**Делает обсервабль который испускает полученные параметры
  * repeat - повторяет обсервабль заданное количество раз
  * */
 function ofTest() {
-    const observable = Rx.Observable.of(1, 123, 21, Rx.Scheduler.async).repeat(2);
+    const observable = of(1, 123, 21, Scheduler.async).pipe(repeat(2));
     subscribeTest(observable);
 }
 
@@ -379,14 +463,14 @@ function ofTest() {
  * error - прерывает репит
  * */
 function repeatTest() {
-    const observable = Rx.Observable.create((observer) => {
+    const observable = Observable.create((observer) => {
         observer.next(1);
 
         //observer.complete();
         observer.error('err 2529rr');
         //
         //observer.next(2);
-    }).repeat(2);
+    }).pipe(repeat(2))
     subscribeTest(observable);
 }
 
@@ -397,10 +481,10 @@ function repeatTest() {
  * */
 function repeatWhenTest() {
 
-    const observable = Rx.Observable.of(1, 2).repeatWhen(
+    const observable = of(1, 2).pipe(repeatWhen(
         (notifications) => {
-            return Rx.Observable.create(
-                (observer: Rx.Observer<number>) => {
+            return Observable.create(
+                (observer: Observer<number>) => {
                     setTimeout(() => {
                         observer.next(1);
                     }, 100);
@@ -413,9 +497,8 @@ function repeatWhenTest() {
                 }
             );
         }
-    );
+    ));
     subscribeTest(observable);
-
 }
 
 /**
@@ -424,7 +507,7 @@ function repeatWhenTest() {
  * Если комплит - то повора не будет.
  * */
 function retryTest() {
-    const observable = Rx.Observable.create(
+    const observable = Observable.create(
         (observer) => {
             observer.next(1);
             //observer.error('errr');
@@ -438,20 +521,16 @@ function retryTest() {
  * Тоже что и интервал, только задает стартовую отсрочку запуска испусканий последовательности
  * */
 function timerTest() {
-    const observable = Rx.Observable.timer(1000, 100);
+    const observable = timer(1000, 100);
     subscribeTest(observable);
 }
 
 /**
  * Группирует значение испускаемые обсерваблем 1 и исупускает их массив при эмите второго обсерваля*/
 function bufferTest() {
-
-    const observable1 = Rx.Observable.interval(100);
-    const observable2 = Rx.Observable.interval(1000);
-
+    const observable1 = interval(100);
+    const observable2 = interval(1000);
     subscribeTest(observable1.buffer(observable2));
-
-
 }
 
 /**
@@ -459,37 +538,34 @@ function bufferTest() {
  * второй параметр - сдвиг счетчика элементов
  * */
 function bufferCountTest() {
-
-    const observable = Rx.Observable.from([1, 2, 3, 4, 5, 6, 7]);
-    const buffered = observable.bufferCount(3, 1);
+    const observable = from([1, 2, 3, 4, 5, 6, 7]);
+    const buffered = observable.pipe(bufferCount(3, 1));
     subscribeTest(buffered);
-
 }
 
 /**
  * Функция сброса буффера генерится через фабрику, для каждой группы будет новая
  * */
 function bufferWhenTest() {
-
-    var observable = Rx.Observable.interval(100);
-    var buffered = observable.bufferWhen(
+    var observable = Observable.interval(100);
+    var buffered = observable.pipe(bufferWhen(
         () => {
-            return Rx.Observable.create((observer) => {
+            return Observable.create((observer) => {
                 setTimeout(() => {
                     //observer.next(1);
                     observer.complete();
                 }, 1000);
             })
         }
-    );
+    ));
     buffered.subscribe(x => console.log(x));
 
 }
 
 /**Игнорит новые испускания родительского обзервабля, до тех пор пока не закомплититься дочерний*/
 function exhaustMapTest() {
-    let observable1 = Rx.Observable.interval(6000).take(2);
-    let observable2 = observable1.exhaustMap((ev) => Rx.Observable.interval(1000).take(4));
+    let observable1 = interval(6000).pipe(take(2));
+    let observable2 = observable1.exhaustMap((ev) => interval(1000).pipe(take(4)));
     observable2.subscribe(x => console.log(x));
 }
 
@@ -497,8 +573,8 @@ function exhaustMapTest() {
  * Переходит к следующему внешнему испусканию, только если испускание внутренних завершено.
  * */
 function concatMapTestToTest() {
-    let observable1 = Rx.Observable.of(2, 3);
-    let observable2 = observable1.concatMapTo(Rx.Observable.interval(1000).take(4));
+    let observable1 = of(2, 3);
+    let observable2 = observable1.concatMapTo(interval(1000).take(4));
     observable2.subscribe(x => console.log(x));
 }
 /**
@@ -509,22 +585,22 @@ function concatMapTestToTest() {
  * внешнего обсервабля.
  * */
 function concatMapTest() {
-    const observable = Rx.Observable.of(2, 3);
-    const result = observable.concatMap(
+    const observable = of(2, 3);
+    const result = observable.pipe(concatMap(
         (x) => {
             console.log(`x = ${x}`)
-            return Rx.Observable.of(2, 2)
+            return of(2, 2)
         },
         (x, y, ix, iy) => x * y
-    );
+    ));
     subscribeTest(result);
 }
 
 
 function testScheduler() {
 
-    let o2 = Rx.Observable.of(1, 2, 3);
-    let o = o2.observeOn(Rx.Scheduler.async);
+    let o2 = of(1, 2, 3);
+    let o = o2.observeOn(Scheduler.async);
 
     let observer = {
         next: (result) => {
@@ -545,7 +621,7 @@ function testScheduler() {
 /***/
 function testObservable2() {
 
-    let o = Rx.Observable.create((observer: Rx.Observer<number>) => {
+    let o = Observable.create((observer: Observer<number>) => {
         observer.next(1);
     });
 
@@ -555,7 +631,7 @@ function testObservable2() {
             return result + result;
         })
         .switchMap((result) => {
-            let o2 = Rx.Observable.create((observer: Rx.Observer<Object>) => {
+            let o2 = Observable.create((observer: Observer<Object>) => {
                 observer.next({'q': result, 'w': 1});
             });
             return o2;
@@ -572,7 +648,7 @@ function testObservable2() {
 function testBehaviorSubject() {
 
     // Сохранять последнй эмит
-    let bs = new Rx.BehaviorSubject(0);
+    let bs = new BehaviorSubject(0);
 
     // Сохранять несколько (5) последних эмитов, после комплита никто больше ничего не получит
     //let bs = new Rx.ReplaySubject(5);
@@ -604,10 +680,10 @@ function testBehaviorSubject() {
 
 function testMulticast() {
 
-    let subject = new Rx.Subject();
+    let subject = new Subject();
 
-    let observable = Rx.Observable.create(
-        (observer: Rx.Observer<number>) => {
+    let observable = Observable.create(
+        (observer: Observer<number>) => {
             observer.next(1);
         }
     );
@@ -636,7 +712,7 @@ function testMulticast() {
 }
 
 function testSubject() {
-    let subject = new Rx.Subject();
+    let subject = new Subject();
 
     subject.subscribe(
         (v) => console.log(`observer A: ${v}`),
@@ -668,14 +744,14 @@ function testSubject() {
         subject.complete();
     }, 300);
 
-    // Генерить испускания в субъекте
-    let o = Rx.Observable.create((observer: Rx.Observer<number>) => {
-        observer.next(11);
-    });
-
     o.subscribe(subject);
 
 }
+
+// Генерить испускания в субъекте
+let o = Observable.create((observer: Observer<number>) => {
+    observer.next(11);
+});
 
 
 /**
@@ -684,7 +760,7 @@ function testSubject() {
  * */
 function testObservable() {
     let i = 1;
-    let observableFromFunc = Rx.Observable.create((observer: Rx.Observer<number>) => {
+    let observableFromFunc = Observable.create((observer: Observer<number>) => {
             // Синхронные вызовы!!!
             observer.next(i++);
             observer.next(i++);
@@ -759,7 +835,7 @@ function testEventEmitter() {
     });
 
     // Делаем источник из события
-    let observable = Rx.Observable.fromEvent(ee, 'event');
+    let observable = fromEvent(ee, 'event');
     observable
         .subscribe((result) => {
             console.log(`subscribe result ${result}`);
@@ -773,7 +849,7 @@ function testEventEmitter() {
 }
 
 
-function subscribeTest(observable: Rx.Observable<any>) {
+function subscribeTest(observable: Observable<any>) {
     observable.subscribe(
         (result) => {
             console.log(result);
@@ -786,4 +862,6 @@ function subscribeTest(observable: Rx.Observable<any>) {
         }
     );
 }
+
+
 

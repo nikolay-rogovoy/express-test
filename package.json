@@ -1,29 +1,30 @@
 {
-  "name": "test",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "test": "node tools/test.js",
-    "start": "node ./app/server.js",
-    "tsc": "tsc",
-    "tsc-w": "tsc -w",
-    "testRXJS": "node tools/testRXJS.js",
-    "testRXJS2": "node tools/testRXJS.js",
-    "testReport": "node tools/testReport.js",
-    "testRegExp": "node tools/testRegExp.js",
-    "testMagicString": "node tools/testMagicString.js",
-    "testAsyncAwait": "node tools/testAsyncAwait.js",
-    "testRegex": "node tools/testRegex.js"
-  },
-  "author": "n_g <nikolay.rogovoy@gmail.com>",
-  "license": "ISC",
-  "keywords": [],
-  "description": "Test project",
-  "dependencies": {
-    "async": "^2.5.0",
-    "express": "^4.15.3",
-    "magic-string": "^0.22.4",
-    "rxjs": "^5.4.2",
-    "typescript": "^2.4.2"
-  }
+    "name": "test",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "test": "node tools/test.js",
+        "start": "node ./app/server.js",
+        "tsc": "tsc",
+        "tsc-w": "tsc -w",
+        "testRXJS": "node tools/testRXJS.js",
+        "testRXJS2": "node tools/testRXJS.js",
+        "testReport": "node tools/testReport.js",
+        "testRegExp": "node tools/testRegExp.js",
+        "testMagicString": "node tools/testMagicString.js",
+        "testAsyncAwait": "node tools/testAsyncAwait.js",
+        "testRegex": "node tools/testRegex.js"
+    },
+    "author": "n_g <nikolay.rogovoy@gmail.com>",
+    "license": "ISC",
+    "keywords": [],
+    "description": "Test project",
+    "dependencies": {
+        "async": "^2.5.0",
+        "express": "^4.15.3",
+        "magic-string": "^0.22.4",
+        "rxjs": "^5.5.5",
+        "typescript": "^2.4.2",
+        "winston": "^2.3.1"
+    }
 }
