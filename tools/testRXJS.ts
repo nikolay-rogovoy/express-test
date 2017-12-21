@@ -1,10 +1,22 @@
-
-import {GroupedObservable} from "rxjs/operator/groupBy";
-
-const EventEmitter = require('events');
 import {
-    reduce, map, switchMap, take, switchMapTo, scan, pluck, partition, pairwise, mergeScan,
-    mergeMapTo, mergeMap, mapTo, groupBy, flatMap, expand, repeat, repeatWhen, bufferCount, bufferWhen, concatMap
+    bufferCount,
+    bufferWhen,
+    concatMap,
+    expand,
+    map,
+    mapTo,
+    mergeMap,
+    mergeMapTo,
+    mergeScan,
+    pairwise,
+    pluck,
+    reduce,
+    repeat,
+    repeatWhen,
+    scan,
+    switchMap,
+    switchMapTo,
+    take
 } from "rxjs/operators";
 import {Observable} from "rxjs/Observable";
 import {of} from "rxjs/observable/of";
@@ -13,7 +25,7 @@ import {zip} from "rxjs/observable/zip";
 import {from} from "rxjs/observable/from";
 import {Observer} from "rxjs/Observer";
 import {interval} from "rxjs/observable/interval";
-import {pipe, Scheduler} from "rxjs/Rx";
+import {Scheduler} from "rxjs/Rx";
 import {forkJoin} from "rxjs/observable/forkJoin";
 import {bindCallback} from "rxjs/observable/bindCallback";
 import {defer} from "rxjs/observable/defer";
@@ -27,6 +39,9 @@ import {BehaviorSubject} from "rxjs/BehaviorSubject";
 import {Subject} from "rxjs/Subject";
 import {fromEvent} from "rxjs/observable/fromEvent";
 import {SizedocPlanComponent} from "./src/sizedoc/load-resource/load-resource";
+import {TestHttp} from "./src/test-http";
+
+const EventEmitter = require('events');
 //import * as Rx from 'rxjs/Rx';
 //const Rx = require('rxjs/Rx.js');
 
@@ -34,10 +49,41 @@ import {SizedocPlanComponent} from "./src/sizedoc/load-resource/load-resource";
 (function main() {
     console.log('start');
 
-    // switchMapTest();
+    /*
+    let obj = new Object();
+    obj["dt"] = new Date();
+    obj["id"] = 1;
 
-    let sizedocPlanComponent = new SizedocPlanComponent();
-    sizedocPlanComponent.test();
+    console.log(JSON.stringify(obj));
+    */
+    //console.log(obj.plandate);
+    //console.log(typeof obj.plandate);
+
+    //let dt = new Date("2017-12-20T13:00:00");
+    /*
+    let dt = new Date(Date.parse("2017-12-20T13:00:00"));
+    console.log(JSON.stringify(dt));
+    console.log(dt.toString());
+    console.log(dt.toUTCString());
+    */
+
+    //let currentDate = new Date();
+    //let currentDate2 = JSON.stringify(currentDate);
+    //console.log(currentDate2.toString()); // Now currentDate is in a different format... oh gosh what do we do...
+    let currentDate3 = new Date(JSON.parse('2017-12-20T13:00:00'));
+    console.log(currentDate3.toString());
+    console.log(currentDate3.toUTCString());
+
+
+
+
+
+    // switchMapTest();
+    //let sizedocPlanComponent = new SizedocPlanComponent();
+    //sizedocPlanComponent.test();
+
+    //let testHttp = new TestHttp();
+    //testHttp.test();
 
     console.log('end');
 
@@ -862,6 +908,7 @@ function subscribeTest(observable: Observable<any>) {
         }
     );
 }
+
 
 
 

@@ -12,6 +12,7 @@ const resource_1 = require("./resource");
 const task_1 = require("./task");
 const power_1 = require("./power");
 const task_plan_1 = require("./task-plan");
+const merge_1 = require("rxjs/observable/merge");
 var logger = require("../../../logger.js");
 /***/
 class SizedocPlanComponent {
@@ -46,8 +47,22 @@ class SizedocPlanComponent {
         // Получить список ресурсов
         if (this.days.length) {
             // Получить что нужно распределить
-            let observableNeed = this.service.getEntityForField('idcustomersize', null, new sizedoc_1.SizedocFactory())
-                .pipe(operators_1.map(sizedocs => sizedocs));
+            let dtMin = this.days[0];
+            let dtMax = this.days[this.days.length - 1];
+            let dtMax1 = new Date(dtMax);
+            dtMax1.setTime(dtMax.getTime() + 1 * 86400000);
+            let observableNeed = merge_1.merge(this.service.getEntityForField('idcustomersize', null, new sizedoc_1.SizedocFactory())
+                .pipe(operators_1.map(sizedocs => sizedocs), operators_1.mergeMap((sizedocs) => {
+                return from_1.from(sizedocs);
+            })), this.service.getEntityForFieldRange('plandate', `${dtMin.getFullYear()}${dtMin.getMonth() + 1}${dtMin.getDate()}`, `${dtMax1.getFullYear()}${dtMax1.getMonth() + 1}${dtMax1.getDate()}`, new sizedocstagevalue_1.SizedocstagevalueFactory())
+                .pipe(operators_1.map((entitys) => entitys), operators_1.map((sizedocstagevalues) => {
+                return sizedocstagevalues.filter(x => x.idsizedocstage === 1);
+            }), operators_1.mergeMap((sizedocstagevalues) => {
+                return from_1.from(sizedocstagevalues);
+            }), operators_1.mergeMap((sizedocstagevalue) => {
+                return this.service.getEntity(sizedocstagevalue.idsizedoc, new sizedoc_1.SizedocFactory());
+            }), operators_1.map((entity) => entity)))
+                .pipe(operators_1.reduce((acc, cur) => { acc.push(cur); return acc; }, []));
             // Получить ресурсы и распределенные таски
             let observableResources = this.service.getEntityListForParent('customertype', 11, new customer_1.CustomerFactory())
                 .pipe(operators_1.map((customers) => customers), operators_1.map((customers) => customers.filter(customer => customer.idcustomertype === 11)), operators_1.mergeMap((customers) => {
@@ -133,15 +148,25 @@ class SizedocPlanComponent {
                     }
                     this.resources.push(new resource_1.Resource(iResourceT.resource.customer.idcustomer, iResourceT.resource.customer.name, iResourceT.resource.customer.comment, tasks, powers, iResourceT));
                 }
-                // Неназначенные документы замеров
+                // Документы замеров
                 let taskPlans = [];
                 for (let sizedoc of result.sizedocs) {
-                    taskPlans.push(new task_plan_1.TaskPlan(sizedoc.idsizedoc, sizedoc.name, sizedoc.customer_name, 1, null, sizedoc));
+                    // Занятые таски отменчем что они заняты
+                    let existsTask = null;
+                    for (let resource of this.resources) {
+                        for (let task of resource.tasks) {
+                            if (task.id === sizedoc.idsizedoc) {
+                                existsTask = task;
+                            }
+                        }
+                    }
+                    taskPlans.push(new task_plan_1.TaskPlan(sizedoc.idsizedoc, sizedoc.name, sizedoc.customer_name, 1, existsTask, sizedoc));
                 }
                 // TODO
+                logger.debug(`this.resources`);
                 logger.debug(this.resources);
-                // this.rmSource.resources.next(this.resources);
-                // this.rmSource.taskPlans.next(taskPlans);
+                logger.debug(`taskPlans`);
+                logger.debug(taskPlans);
             });
         }
     }

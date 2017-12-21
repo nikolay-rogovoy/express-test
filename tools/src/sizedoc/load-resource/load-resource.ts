@@ -1,4 +1,4 @@
-import {filter, map, mergeMap, reduce} from "rxjs/operators";
+import {concatMap, filter, map, mergeMap, reduce} from "rxjs/operators";
 import {from} from "rxjs/observable/from";
 import {forkJoin} from "rxjs/observable/forkJoin";
 
@@ -16,7 +16,7 @@ import {Resource} from "./resource";
 import {Task} from "./task";
 import {Power} from "./power";
 import {TaskPlan} from "./task-plan";
-import {Observable} from "rxjs/Observable";
+import {merge} from "rxjs/observable/merge";
 
 var logger = require("../../../logger.js");
 
@@ -66,8 +66,40 @@ export class SizedocPlanComponent {
         if (this.days.length) {
 
             // Получить что нужно распределить
-            let observableNeed = this.service.getEntityForField('idcustomersize', null, new SizedocFactory())
-                .pipe(map(sizedocs => <Sizedoc[]>sizedocs));
+            let dtMin = this.days[0];
+            let dtMax = this.days[this.days.length - 1];
+            let dtMax1 = new Date(dtMax);
+            dtMax1.setTime(dtMax.getTime() + 1 * 86400000);
+
+            let observableNeed = merge(
+                this.service.getEntityForField('idcustomersize', null, new SizedocFactory())
+                    .pipe(
+                        map(sizedocs => <Sizedoc[]>sizedocs),
+                        mergeMap((sizedocs: Sizedoc[]) => {
+                            return from(sizedocs);
+                        })
+                    ),
+                this.service.getEntityForFieldRange('plandate',
+                    `${dtMin.getFullYear()}${dtMin.getMonth() + 1}${dtMin.getDate()}`,
+                    `${dtMax1.getFullYear()}${dtMax1.getMonth() + 1}${dtMax1.getDate()}`,
+                    new SizedocstagevalueFactory())
+                    .pipe(
+                        map((entitys: IEntity[]) => <Sizedocstagevalue[]>entitys),
+                        map((sizedocstagevalues: Sizedocstagevalue[]) => {
+                            return sizedocstagevalues.filter(x => x.idsizedocstage === 1);
+                        }),
+                        mergeMap((sizedocstagevalues: Sizedocstagevalue[]) => {
+                            return from(sizedocstagevalues);
+                        }),
+                        mergeMap((sizedocstagevalue: Sizedocstagevalue) => {
+                            return this.service.getEntity(sizedocstagevalue.idsizedoc, new SizedocFactory());
+                        }),
+                        map((entity: IEntity) => <Sizedoc>entity)
+                    )
+            )
+                .pipe(reduce((acc, cur: Sizedoc) => { acc.push(cur); return acc; }, []));
+
+
 
             // Получить ресурсы и распределенные таски
             let observableResources = this.service.getEntityListForParent('customertype', 11, new CustomerFactory())
@@ -171,18 +203,30 @@ export class SizedocPlanComponent {
                             this.resources.push(new Resource(iResourceT.resource.customer.idcustomer, iResourceT.resource.customer.name,
                                 iResourceT.resource.customer.comment, tasks, powers, iResourceT));
                         }
-                        // Неназначенные документы замеров
+                        // Документы замеров
                         let taskPlans: TaskPlan[] = [];
                         for (let sizedoc of result.sizedocs) {
-                            taskPlans.push(new TaskPlan(sizedoc.idsizedoc, sizedoc.name, sizedoc.customer_name, 1, null, sizedoc));
+                            // Занятые таски отменчем что они заняты
+                            let existsTask: Task = null;
+
+                            for (let resource of this.resources) {
+                                for (let task of resource.tasks) {
+                                    if (task.id === sizedoc.idsizedoc) {
+                                        existsTask = task;
+                                    }
+                                }
+                            }
+                            taskPlans.push(new TaskPlan(sizedoc.idsizedoc, sizedoc.name, sizedoc.customer_name, 1, existsTask, sizedoc));
                         }
 
                         // TODO
+                        logger.debug(`this.resources`);
                         logger.debug(this.resources);
-                        // this.rmSource.resources.next(this.resources);
-                        // this.rmSource.taskPlans.next(taskPlans);
+                        logger.debug(`taskPlans`);
+                        logger.debug(taskPlans);
                     }
                 );
         }
     }
+
 }
