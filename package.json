@@ -12,7 +12,8 @@
         "testRegExp": "node tools/testRegExp.js",
         "testMagicString": "node tools/testMagicString.js",
         "testAsyncAwait": "node tools/testAsyncAwait.js",
-        "testRegex": "node tools/testRegex.js"
+        "testRegex": "node tools/testRegex.js",
+        "testPG": "node tools/lib-pg.js"
     },
     "author": "n_g <nikolay.rogovoy@gmail.com>",
     "license": "ISC",
@@ -22,6 +23,7 @@
         "async": "^2.5.0",
         "express": "^4.15.3",
         "magic-string": "^0.22.4",
+        "pg": "^7.4.0",
         "rxjs": "^5.5.5",
         "typescript": "^2.4.2",
         "winston": "^2.3.1"

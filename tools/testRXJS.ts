@@ -70,9 +70,9 @@ const EventEmitter = require('events');
     //let currentDate = new Date();
     //let currentDate2 = JSON.stringify(currentDate);
     //console.log(currentDate2.toString()); // Now currentDate is in a different format... oh gosh what do we do...
-    let currentDate3 = new Date(JSON.parse('2017-12-20T13:00:00'));
-    console.log(currentDate3.toString());
-    console.log(currentDate3.toUTCString());
+    let currentDate3 = new Date();
+    console.log(JSON.stringify(currentDate3));
+    //console.log(currentDate3.toUTCString());
 
 
 

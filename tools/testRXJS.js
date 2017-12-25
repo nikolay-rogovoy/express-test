@@ -21,8 +21,6 @@ const BehaviorSubject_1 = require("rxjs/BehaviorSubject");
 const Subject_1 = require("rxjs/Subject");
 const fromEvent_1 = require("rxjs/observable/fromEvent");
 const EventEmitter = require('events');
-var logger = require("./logger.js");
-
 //import * as Rx from 'rxjs/Rx';
 //const Rx = require('rxjs/Rx.js');
 (function main() {
@@ -46,57 +44,9 @@ var logger = require("./logger.js");
     //let currentDate = new Date();
     //let currentDate2 = JSON.stringify(currentDate);
     //console.log(currentDate2.toString()); // Now currentDate is in a different format... oh gosh what do we do...
-    //let currentDate3 = new Date(Date.parse('2017-12-23T10:00:00'));
-    //console.log(currentDate3.toString());
+    let currentDate3 = new Date();
+    console.log(JSON.stringify(currentDate3));
     //console.log(currentDate3.toUTCString());
-
-    Date.prototype.toJSON = function () {
-        return this.getFullYear().toString().padStart(4, '0')
-        + "-"
-        + (this.getMonth() + 1).toString().padStart(2, '0')
-        + "-"
-        + this.getDate().toString().padStart(2, '0')
-        + "T"
-        + this.getHours().toString().padStart(2, '0')
-        + ":"
-        + this.getMinutes().toString().toString().padStart(2, '0')
-        + ":"
-        + this.getSeconds().toString().padStart(2, '0');
-    };
-
-    let dt = new Date();
-    let qwe = JSON.stringify(dt).replace('"', '').replace('"', '');;
-    logger.debug(qwe);
-    dt = new Date(Date.parse(qwe));
-    logger.debug(dt.toString());
-
-    /*
-    let o = new Object();
-    o["dt"] = new Date();
-    o["id"] = 1;
-
-    let str = JSON.stringify(o);
-
-    logger.debug(str);
-    logger.debug(o);
-
-    let o2 = JSON.parse(str);
-
-    logger.debug(JSON.stringify(o2));
-    logger.debug(o2);
-    logger.debug(new Date(Date.parse(o2.dt)));
-    logger.debug(new Date(Date.parse(o2.dt)).toString());
-*/
-
-    /*
-    let dt = new Date();
-    logger.debug(dt.toString());
-    let str = JSON.stringify(dt).replace('"', '').replace('"', '');
-    logger.debug(str);
-    let dt2 = new Date(Date.parse(str));
-    logger.debug(dt2.toString());
-    */
-
     // switchMapTest();
     //let sizedocPlanComponent = new SizedocPlanComponent();
     //sizedocPlanComponent.test();
