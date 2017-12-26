@@ -34,22 +34,41 @@ exports.LibPg = LibPg;
     logger.debug(`libPG main -> start`);
     let libPg = new LibPg();
     let pool = libPg.connect();
+    let entityName = 'customer';
+    let entityKey = 25;
     let query = `
 SELECT
   ec.identity,
   ec.name,
-  es.child_column_name
+  ec.comment,
+  es.child_column_name,
+  ecol.name as col_name
 from entity e
   join entityschema es on e.name = es.parent_table_name
-  join entity ec on es.child_table_name = ec.name
-where e.name = 'customer';
+  join entity ec on es.child_table_name = ec.name and es.child_column_name <> 'idcustomerkey'
+                    and not exists(select * from get_parent_entity_form(ec.name, 0) f where f.name = e.name)
+  -- Эти сущности удаляются каскадно
+  left join entitycolumn ecol on  ec.identity = ecol.identity and ecol.name = 'name'
+where e.name = $1;
 `;
-    fromPromise_1.fromPromise(pool.query(query))
+    fromPromise_1.fromPromise(pool.query(query, [entityName]))
         .subscribe((result) => {
         logger.debug(result.rows);
         let querySlaveEntity = '';
         for (let row of result.rows) {
-            logger.debug(row);
+            //logger.debug(row);
+            querySlaveEntity = querySlaveEntity + `select id${row.name} as key, '${row.name}' as entity_name, '${row.comment}' as entity_comment, ${row.col_name == null ? "null" : row.col_name + '::text'} as name_entity from ${row.name} where ${row.child_column_name} = ${entityKey}
+union all
+`;
+        }
+        querySlaveEntity = querySlaveEntity.replace(/union all\n$/m, ';');
+        //logger.debug(querySlaveEntity);
+        // Выполнить полученный запрос
+        if (querySlaveEntity != '') {
+            fromPromise_1.fromPromise(pool.query(querySlaveEntity))
+                .subscribe((result) => {
+                logger.debug(result.rows);
+            });
         }
     });
 })();
