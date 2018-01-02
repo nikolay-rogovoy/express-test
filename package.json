@@ -9,7 +9,7 @@
         "tsc-w": "tsc -w",
         "testRXJS": "node tools/testRXJS.js",
         "testReport": "node tools/testReport.js",
-        "testRegExp": "node tools/testRegExp.js",
+        "testRegExp": "ID='123 32.123' node tools/testRegExp.js test qwe --ewq",
         "testMagicString": "node tools/testMagicString.js",
         "testAsyncAwait": "node tools/testAsyncAwait.js",
         "testRegex": "node tools/testRegex.js",

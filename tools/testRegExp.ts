@@ -5,12 +5,22 @@
 (function main() {
   console.log('main -> start');
 
-  let s = 'idorderdoc';
+
+    process.argv.forEach(function (val, index, array) {
+        console.log(index + ': ' + val);
+    });
+
+    console.log(process.env.ID)
+
+/*
+    let s = 'idorderdoc';
   let regEx = /^id/;
 
   s = s.replace(/^id/, '');
 
   console.log(s);
+*/
+
 
 })();
 
