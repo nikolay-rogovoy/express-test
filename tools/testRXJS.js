@@ -20,40 +20,35 @@ const timer_1 = require("rxjs/observable/timer");
 const BehaviorSubject_1 = require("rxjs/BehaviorSubject");
 const Subject_1 = require("rxjs/Subject");
 const fromEvent_1 = require("rxjs/observable/fromEvent");
+const throw_1 = require("rxjs/observable/throw");
 const EventEmitter = require('events');
 //import * as Rx from 'rxjs/Rx';
 //const Rx = require('rxjs/Rx.js');
 (function main() {
     console.log('start');
-    /*
-    let obj = new Object();
-    obj["dt"] = new Date();
-    obj["id"] = 1;
-
-    console.log(JSON.stringify(obj));
-    */
-    //console.log(obj.plandate);
-    //console.log(typeof obj.plandate);
-    //let dt = new Date("2017-12-20T13:00:00");
-    /*
-    let dt = new Date(Date.parse("2017-12-20T13:00:00"));
-    console.log(JSON.stringify(dt));
-    console.log(dt.toString());
-    console.log(dt.toUTCString());
-    */
-    //let currentDate = new Date();
-    //let currentDate2 = JSON.stringify(currentDate);
-    //console.log(currentDate2.toString()); // Now currentDate is in a different format... oh gosh what do we do...
-    let currentDate3 = new Date();
-    console.log(JSON.stringify(currentDate3));
-    //console.log(currentDate3.toUTCString());
-    // switchMapTest();
-    //let sizedocPlanComponent = new SizedocPlanComponent();
-    //sizedocPlanComponent.test();
-    //let testHttp = new TestHttp();
-    //testHttp.test();
+    testThrow();
     console.log('end');
 })();
+/***/
+function testThrow() {
+    of_1.of(1, 2, 3, 4)
+        .pipe(operators_1.mergeMap((num) => {
+        if (num > 3) {
+            return throw_1._throw(`errrr ${num}`);
+        }
+        else {
+            return of_1.of(num);
+        }
+    }), operators_1.map((num) => {
+        console.log(`map num = ${num}`);
+        return num;
+    }))
+        .subscribe((res) => {
+        console.log(`res = ${res}`);
+    }, (err) => {
+        console.log(`err = ${err}`);
+    });
+}
 /**
  * Последний эмит отменяет все предыдущие эмиты
  * Запомнить как Переключиться на новый обозревабль
