@@ -3,14 +3,11 @@
  */
 
 (function main() {
-  console.log('main -> start');
+    console.log('main -> start');
 
-  let s = 'idorderdoc';
-  let regEx = /^id/;
+    let str = `VGVzdCB0ZXh0OwrQotC10YHRgtC+0LLRi9C5INGC0LXQutGB0YIK`;
+    const str2 = new Blob([str], {type: 'text/plain'});
 
-  s = s.replace(/^id/, '');
-
-  console.log(s);
+    console.log(str2);
 
 })();
-

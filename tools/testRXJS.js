@@ -23,6 +23,12 @@ const fromEvent_1 = require("rxjs/observable/fromEvent");
 const EventEmitter = require('events');
 //import * as Rx from 'rxjs/Rx';
 //const Rx = require('rxjs/Rx.js');
+class TestClass {
+    constructor(f1, f2) {
+        this.f1 = f1;
+        this.f2 = f2;
+    }
+}
 (function main() {
     console.log('start');
     /*
@@ -44,16 +50,84 @@ const EventEmitter = require('events');
     //let currentDate = new Date();
     //let currentDate2 = JSON.stringify(currentDate);
     //console.log(currentDate2.toString()); // Now currentDate is in a different format... oh gosh what do we do...
-    let currentDate3 = new Date();
-    console.log(JSON.stringify(currentDate3));
+    //let currentDate3 = new Date();
+    //console.log(JSON.stringify(currentDate3));
     //console.log(currentDate3.toUTCString());
     // switchMapTest();
     //let sizedocPlanComponent = new SizedocPlanComponent();
     //sizedocPlanComponent.test();
     //let testHttp = new TestHttp();
     //testHttp.test();
-    console.log('end');
+    //console.log(Object.prototype.toString.call(o));
+    //throwTest();
+    of_1.of([[1, 2], [3, 4], [5, 6]])
+        .pipe(operators_1.mergeMap((x) => {
+        let res = [];
+        for (let arr of x) {
+            for (let item of arr) {
+                // return of(item)
+                res.push(item);
+            }
+        }
+        return from_1.from(res);
+    }))
+        .subscribe((x) => {
+        console.log(x);
+    });
+    // console.log('test error');
+    // of(0, 1, 2)
+    //     .pipe(
+    //         map((num) => {
+    //             if (num === 1)
+    //                 throw new Error('qweqwe');
+    //             return num;
+    //         })
+    //     )
+    //     .subscribe((num) => {
+    //             console.log(num);
+    //         },
+    //         (error) => {
+    //             console.error(error);
+    //         }
+    //     );
+    //
+    // console.log('end');
 })();
+function throwTest() {
+    of_1.of(0, 1, 2)
+        .pipe(operators_1.switchMap(x => of_1.of(x)), operators_1.switchMap(x => {
+        return of_1.of(x)
+            .pipe(operators_1.map((val) => {
+            if (val === 2) {
+                //return _throw(val);
+                throw val;
+            }
+            else {
+                return val;
+            }
+        }), operators_1.mapTo(10));
+    }), operators_1.switchMap(x => {
+        console.log(x);
+        return of_1.of(x);
+    }))
+        .subscribe((res) => {
+        console.log(`res = ${res}`);
+    }, (error) => {
+        console.log(`error = ${error}`);
+    });
+}
+/***/
+function getType(obj) {
+    return Object.prototype.toString.call(obj);
+}
+/***/
+function test123() {
+    of_1.of(of_1.of(true), of_1.of(false), of_1.of(true), of_1.of(true))
+        .pipe(operators_1.mergeAll(), operators_1.filter(x => !x), operators_1.isEmpty())
+        .subscribe((res) => {
+        console.log(res);
+    });
+}
 /**
  * Последний эмит отменяет все предыдущие эмиты
  * Запомнить как Переключиться на новый обозревабль

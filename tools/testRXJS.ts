@@ -2,9 +2,9 @@ import {
     bufferCount,
     bufferWhen,
     concatMap,
-    expand,
+    expand, filter, isEmpty,
     map,
-    mapTo,
+    mapTo, mergeAll,
     mergeMap,
     mergeMapTo,
     mergeScan,
@@ -40,11 +40,16 @@ import {Subject} from "rxjs/Subject";
 import {fromEvent} from "rxjs/observable/fromEvent";
 import {SizedocPlanComponent} from "./src/sizedoc/load-resource/load-resource";
 import {TestHttp} from "./src/test-http";
+import {_throw} from "rxjs/observable/throw";
 
 const EventEmitter = require('events');
 //import * as Rx from 'rxjs/Rx';
 //const Rx = require('rxjs/Rx.js');
 
+class TestClass {
+    constructor(public f1: string, public  f2: string) {
+    }
+}
 
 (function main() {
     console.log('start');
@@ -70,12 +75,9 @@ const EventEmitter = require('events');
     //let currentDate = new Date();
     //let currentDate2 = JSON.stringify(currentDate);
     //console.log(currentDate2.toString()); // Now currentDate is in a different format... oh gosh what do we do...
-    let currentDate3 = new Date();
-    console.log(JSON.stringify(currentDate3));
+    //let currentDate3 = new Date();
+    //console.log(JSON.stringify(currentDate3));
     //console.log(currentDate3.toUTCString());
-
-
-
 
 
     // switchMapTest();
@@ -85,9 +87,105 @@ const EventEmitter = require('events');
     //let testHttp = new TestHttp();
     //testHttp.test();
 
-    console.log('end');
+    //console.log(Object.prototype.toString.call(o));
+
+    //throwTest();
+
+    of([[1, 2], [3, 4], [5, 6]])
+        .pipe(
+            mergeMap((x) => {
+                let res = [];
+                for (let arr of x) {
+                    for (let item of arr) {
+                        // return of(item)
+                        res.push(item);
+
+                    }
+                }
+                return from(res);
+            })
+        )
+        .subscribe((x) => {
+            console.log(x);
+        })
+
+    // console.log('test error');
+    // of(0, 1, 2)
+    //     .pipe(
+    //         map((num) => {
+    //             if (num === 1)
+    //                 throw new Error('qweqwe');
+    //             return num;
+    //         })
+    //     )
+    //     .subscribe((num) => {
+    //             console.log(num);
+    //         },
+    //         (error) => {
+    //             console.error(error);
+    //         }
+    //     );
+    //
+    // console.log('end');
 
 })();
+
+function throwTest() {
+    of(0, 1, 2)
+        .pipe(
+            switchMap(x => of(x)),
+            switchMap(x => {
+                return of(x)
+                    .pipe(
+                        map((val) => {
+                            if (val === 2) {
+                                //return _throw(val);
+                                throw val;
+                            } else {
+                                return val;
+                            }
+                        }),
+                        mapTo(10)
+                    );
+            }),
+            switchMap(x => {
+                console.log(x);
+                return of(x);
+            })
+        )
+        .subscribe(
+            (res) => {
+                console.log(`res = ${res}`);
+            },
+            (error) => {
+                console.log(`error = ${error}`);
+            }
+        );
+}
+
+
+/***/
+function getType(obj)
+{
+    return Object.prototype.toString.call(obj);
+}
+
+/***/
+function test123() {
+
+    of(of(true), of(false), of(true), of(true))
+        .pipe(
+            mergeAll(),
+            filter(x => !x),
+            isEmpty()
+        )
+        .subscribe(
+            (res) => {
+                console.log(res);
+            }
+        );
+
+}
 
 /**
  * Последний эмит отменяет все предыдущие эмиты

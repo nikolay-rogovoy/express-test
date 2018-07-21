@@ -1,0 +1,31 @@
+.flex-container {
+    display: flex;
+    width: 100%;
+}
+
+.flex-container-wrap {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.flex-item-1 { flex: 1; }
+.flex-item-2 { flex: 2; }
+.flex-item-3 { flex: 3; }
+.flex-item-4 { flex: 4; }
+.flex-item-5 { flex: 5; }
+
+.table-cell {
+    border: 1px solid black;
+}
+
+.wrapped {
+    height: 0;
+    visibility: hidden;
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.row-expand-button {
+
+}

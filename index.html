@@ -1,22 +1,116 @@
 <html>
-    <head>
+<head>
+    <meta charset="UTF-8">
+    <script src="https://code.jquery.com/jquery-2.2.4.js"></script>
+    <link href="styles.css" type="text/css" rel="stylesheet">
+</head>
+<body>
 
-    </head>
-    <body>
+    <div class="flex-container-wrap">
+        <div class="flex-item-1 table-cell" style="min-width: 100px">
+            <button id="row1Button" name="row1Button" class="">+</button>
+            asd
+        </div>
+        <div class="flex-item-1 table-cell" style="min-width: 100px">
+            asd
+        </div>
+        <div class="flex-item-1 table-cell" style="min-width: 100px">
+            asd
+        </div>
+        <div class="flex-item-1 table-cell" style="min-width: 100px">
+            asd
+        </div>
+        <div class="flex-item-1 table-cell" style="min-width: 100px">
+            asd
+        </div>
+        <div class="flex-item-1 table-cell" style="min-width: 100px">
+            asd
+        </div>
+        <div class="flex-item-1 table-cell" style="min-width: 100px">
+            asd
+        </div>
+        <div class="flex-item-1 table-cell" style="min-width: 100px">
+            asd
+        </div>
+    </div>
+    <div class="flex-container-wrap">
+        <div class="flex-item-1 table-cell" style="min-width: 100px">
+            asd
+        </div>
+        <div class="flex-item-1 table-cell" style="min-width: 100px">
+            asd
+        </div>
+        <div class="flex-item-1 table-cell" style="min-width: 100px">
+            asd
+        </div>
+        <div class="flex-item-1 table-cell" style="min-width: 100px">
+            asd
+        </div>
+        <div class="flex-item-1 table-cell" style="min-width: 100px">
+            asd
+        </div>
+        <div class="flex-item-1 table-cell" style="min-width: 100px">
+            asd
+        </div>
+        <div class="flex-item-1 table-cell" style="min-width: 100px">
+            asd
+        </div>
+        <div class="flex-item-1 table-cell" style="min-width: 100px">
+            asd
+        </div>
+    </div>
 
-        <p id="qwe"></p>
+    <script>
+        var detectWrap = function(className) {
+            var wrappedItems = [];
+            var prevItem = {};
+            var currItem = {};
+            var items = document.getElementsByClassName(className);
 
-        <script>
+            for (var i = 0; i < items.length; i++) {
+                currItem = items[i].getBoundingClientRect();
+                if (prevItem && prevItem.top < currItem.top) {
+                    wrappedItems.push(items[i]);
+                }
+                prevItem = currItem;
+            };
 
-            let vv = new Date('2017-11-14T11:00:00');
+            return wrappedItems;
 
-            let elem = document.getElementById('qwe');
+        }
 
-            elem.innerText = vv.toString();
-
-            console.log(vv);
-
-        </script>
-
-    </body>
+        window.onresize = function(event) {
+            console.log('resize');
+            let rows = $('.flex-container-wrap');
+            for (let row of rows) {
+                // Ячейки строки
+                let cells = $(row).find('.table-cell');
+                if (cells && cells.length) {
+                    // Первая ячейка относительно которой стравниваем
+                    let firstCell = cells[0];
+                    let firstCellClientRect = firstCell.getBoundingClientRect();
+                    for (let currentCell of cells) {
+                        if (currentCell == firstCell) {
+                            if ($(currentCell).hasClass('wrapped')) {
+                                $(currentCell).removeClass('wrapped');
+                            }
+                        } else {
+                            let currentCellClientRect = currentCell.getBoundingClientRect();
+                            if (firstCellClientRect.top < currentCellClientRect.top) {
+                                // Wraped
+                                if (!$(currentCell).hasClass('wrapped')) {
+                                    $(currentCell).addClass('wrapped');
+                                }
+                            } else {
+                                if ($(currentCell).hasClass('wrapped')) {
+                                    $(currentCell).removeClass('wrapped');
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+</body>
 </html>

@@ -4,6 +4,8 @@
     "main": "index.js",
     "scripts": {
         "test": "node tools/test.js",
+        "test2": "node tools/test2.js",
+        "test2-inspect-brk": "node --inspect-brk tools/test2.js",
         "start": "node ./app/server.js",
         "tsc": "tsc",
         "tsc-w": "tsc -w",
