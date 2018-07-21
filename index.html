@@ -67,6 +67,7 @@
             var currItem = {};
             var items = document.getElementsByClassName(className);
 
+<<<<<<< HEAD
             for (var i = 0; i < items.length; i++) {
                 currItem = items[i].getBoundingClientRect();
                 if (prevItem && prevItem.top < currItem.top) {
@@ -74,6 +75,36 @@
                 }
                 prevItem = currItem;
             };
+=======
+        <table border="1" width="200px;">
+            <tbody>
+                <tr>
+                    <td>
+                        1
+                    </td>
+                    <td>
+                        2
+                    </td>
+                    <td>
+                        3
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        1
+                    </td>
+                    <td>
+                        2
+                    </td>
+                    <td>
+                        3
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <script>
+>>>>>>> b6fc8fbc195b3f037df8e4f0f510264a7ef0e539
 
             return wrappedItems;
 

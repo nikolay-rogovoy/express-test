@@ -54,6 +54,7 @@ class TestClass {
 (function main() {
     console.log('start');
 
+<<<<<<< HEAD
     /*
     let obj = new Object();
     obj["dt"] = new Date();
@@ -86,6 +87,9 @@ class TestClass {
 
     //let testHttp = new TestHttp();
     //testHttp.test();
+=======
+    testThrow();
+>>>>>>> b6fc8fbc195b3f037df8e4f0f510264a7ef0e539
 
     //console.log(Object.prototype.toString.call(o));
 
@@ -130,6 +134,7 @@ class TestClass {
 
 })();
 
+<<<<<<< HEAD
 function throwTest() {
     of(0, 1, 2)
         .pipe(
@@ -151,12 +156,28 @@ function throwTest() {
             switchMap(x => {
                 console.log(x);
                 return of(x);
+=======
+/***/
+function testThrow() {
+    of(1, 2, 3, 4)
+        .pipe(mergeMap((num) => {
+            if (num > 3) {
+                return _throw(`errrr ${num}`);
+            } else {
+                return of(num);
+            }
+        }),
+            map((num) => {
+                console.log(`map num = ${num}`);
+                return num;
+>>>>>>> b6fc8fbc195b3f037df8e4f0f510264a7ef0e539
             })
         )
         .subscribe(
             (res) => {
                 console.log(`res = ${res}`);
             },
+<<<<<<< HEAD
             (error) => {
                 console.log(`error = ${error}`);
             }
@@ -185,6 +206,12 @@ function test123() {
             }
         );
 
+=======
+            (err) => {
+                console.log(`err = ${err}`);
+            }
+        );
+>>>>>>> b6fc8fbc195b3f037df8e4f0f510264a7ef0e539
 }
 
 /**

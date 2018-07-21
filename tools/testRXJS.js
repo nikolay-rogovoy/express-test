@@ -20,6 +20,7 @@ const timer_1 = require("rxjs/observable/timer");
 const BehaviorSubject_1 = require("rxjs/BehaviorSubject");
 const Subject_1 = require("rxjs/Subject");
 const fromEvent_1 = require("rxjs/observable/fromEvent");
+const throw_1 = require("rxjs/observable/throw");
 const EventEmitter = require('events');
 //import * as Rx from 'rxjs/Rx';
 //const Rx = require('rxjs/Rx.js');
@@ -31,6 +32,7 @@ class TestClass {
 }
 (function main() {
     console.log('start');
+<<<<<<< HEAD
     /*
     let obj = new Object();
     obj["dt"] = new Date();
@@ -126,6 +128,29 @@ function test123() {
         .pipe(operators_1.mergeAll(), operators_1.filter(x => !x), operators_1.isEmpty())
         .subscribe((res) => {
         console.log(res);
+=======
+    testThrow();
+    console.log('end');
+})();
+/***/
+function testThrow() {
+    of_1.of(1, 2, 3, 4)
+        .pipe(operators_1.mergeMap((num) => {
+        if (num > 3) {
+            return throw_1._throw(`errrr ${num}`);
+        }
+        else {
+            return of_1.of(num);
+        }
+    }), operators_1.map((num) => {
+        console.log(`map num = ${num}`);
+        return num;
+    }))
+        .subscribe((res) => {
+        console.log(`res = ${res}`);
+    }, (err) => {
+        console.log(`err = ${err}`);
+>>>>>>> b6fc8fbc195b3f037df8e4f0f510264a7ef0e539
     });
 }
 /**
